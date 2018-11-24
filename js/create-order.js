@@ -87,11 +87,45 @@ var app = new Vue({
   },
   methods:{
     confirmOrder:function(){
+        this
         var link = this.orderLink
         var customData = this.choosedSex.toString()+this.choosedAge.toString()+this.choosedValue 
         var payNumber = this.payNumberValue
-        var data = "链接:"+link+"用户自定义信息:"+customData+"投放金额:"+payNumber
-        console.log(data)
+        //var data = "链接:"+link+"用户自定义信息:"+customData+"投放金额:"+payNumber
+        var _this = this//指向vue实例
+        axios.post('http://118.25.16.139/order/Submit', {
+            Url: link,//投放链接
+            Sex: _this.choosedSex.toString(),//目标性别
+            Age:_this.choosedAge.toString(),//目标年龄
+            Region:_this.choosedValue,//目标地域
+            Serving:'5000',//播放量暂时没做
+            Money:_this.payNumber,//投放金额
+            Token:''//token值
+          })
+          .then(function (response) {
+              if(response.data.code == 11){
+                  alert('请重新登录')
+              }
+            console.log(response);
+            console.log('axios is done')
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        //console.log(data)
+    },
+    getToken:function(){
+        var cookieObj = {};
+        var cookieArray = document.cookie.split('; ')
+        for(var i=0;i<cookieArray.length;i++){
+            var cookiesplit = cookieArray[i].split('=')
+            cookieObj[cookiesplit[0].toString()] = cookiesplit[1].toString()	
+        }
+        console.log(cookieObj)
+        //getUserName(cookieObj.userName)
+        //$(".flied_tc").removeClass('show');//隐藏登录框
+        return cookieObj
+        alert(cookieObj.token)
     },
     confirmProvice:function(index){
         console.log(index+'测试index')
@@ -320,6 +354,7 @@ var app = new Vue({
         this.orderTypeName = this.orderTypeLists[index].orderTypeName
         //选择投放方式后,显示默认值
         if(index === 1){//选择自定义投放之后
+            
             this.isShowDefaultValue = true//是否显示默认选中的值
             if(this.proviceLists.length == 0){//只获取一次,有值就不再获取
                 var _this = this //es5
